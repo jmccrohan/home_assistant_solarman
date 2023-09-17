@@ -11,7 +11,7 @@ from pysolarmanv5 import PySolarmanV5
 
 log = logging.getLogger(__name__)
 
-QUERY_RETRY_ATTEMPTS = 2
+QUERY_RETRY_ATTEMPTS = 5
 
 class Inverter:
     def __init__(self, path, serial, host, port, mb_slaveid, lookup_file):
@@ -86,7 +86,6 @@ class Inverter:
                     except Exception as e:
                         result = 0
                         log.warning(f"Querying [{start} - {end}] failed with exception [{type(e).__name__}: {e}]")
-                        self.disconnect_from_server()
                     if result == 0:
                         log.warning(f"Querying [{start} - {end}] failed, [{attempts_left}] retry attempts left")
                     else:
@@ -94,6 +93,8 @@ class Inverter:
                         break
                 if result == 0:
                     log.warning(f"Querying registers [{start} - {end}] failed, aborting.")
+                    self.disconnect_from_server()
+                    if result == 0:
                     break
 
             if result == 1:
